@@ -1,84 +1,61 @@
-import { useState } from 'react';
-import './index.css';
+import React, { Component } from 'react';
+import ReactGA from 'react-ga';
+import $ from 'jquery';
+import './App.css';
+import Header from './Components/Header';
+import Footer from './Components/Footer';
+import About from './Components/About';
+import Resume from './Components/Resume';
+import Contact from './Components/Contact';
+import Testimonials from './Components/Testimonials';
+import Portfolio from './Components/Portfolio';
 
+class App extends Component {
 
+  constructor(props){
+    super(props);
+    this.state = {
+      foo: 'bar',
+      resumeData: {}
+    };
 
+    ReactGA.initialize('UA-110570651-1');
+    ReactGA.pageview(window.location.pathname);
 
-
-function App() {
-  const [calc, setCalc] = useState("");
-  const [setResult] = useState("");
-
-  const ops = ['/', '*', '+', '-', '.' ];
-
-  // to make the operators not double
-  const updateCalc = value => {
-    if (
-      // eslint-disable-next-line no-mixed-operators
-      ops.includes(value) && calc === ' ' ||
-      // eslint-disable-next-line no-mixed-operators
-      ops.includes(value) && ops.includes(calc.slice(-1)
-      )
-    ) {
-      return;
-    }
-    setCalc(calc + value);
-
-    if (!ops.includes(value)) {
-      // eslint-disable-next-line no-eval
-      setResult(eval(calc + value).toString());
-    }
-  }
-// for equal buttons
-  const calculate = () => {
-    // eslint-disable-next-line no-eval
-    setCalc(eval(calc).toString());
   }
 
-  // for delete button
-
-  const deleteLast = () => {
-    if (calc ===' ') {
-      return;
-    }
-
-    const value = calc.slice(0, -1);
-
-    setCalc(value);
+  getResumeData(){
+    $.ajax({
+      url:'/resumeData.json',
+      dataType:'json',
+      cache: false,
+      success: function(data){
+        this.setState({resumeData: data});
+      }.bind(this),
+      error: function(xhr, status, err){
+        console.log(err);
+        alert(err);
+      }
+    });
   }
- //For All clear button
-  const actionClear = () => {
-    setCalc('');
-  };
 
-return (
-    <div className="calculator-grid">
-      <div className="output">
-        
-        <div className="current-operand">{calc || "0" }</div>
+  componentDidMount(){
+    this.getResumeData();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Header data={this.state.resumeData.main}/>
+        <About data={this.state.resumeData.main}/>
+        <Resume data={this.state.resumeData.resume}/>
+        <Portfolio data={this.state.resumeData.portfolio}/>
+        <Testimonials data={this.state.resumeData.testimonials}/>
+        <Contact data={this.state.resumeData.main}/>
+        <Footer data={this.state.resumeData.main}/>
       </div>
-
-      <button onClick={actionClear} className="span-two">AC</button>
-      <button onClick={deleteLast}>DEL</button>
-      <button onClick={()=>updateCalc('/')}>/</button>
-      <button onClick={()=>updateCalc('1')}>1</button>
-      <button onClick={()=>updateCalc('2')}>2</button>
-      <button onClick={()=>updateCalc('3')}>3</button>
-      <button onClick={()=>updateCalc('*')}>*</button>
-      <button onClick={()=>updateCalc('4')}>4</button>
-      <button onClick={()=>updateCalc('5')}>5</button>
-      <button onClick={()=>updateCalc('6')}>6</button>
-      <button onClick={()=>updateCalc('+')}>+</button>
-      <button onClick={()=>updateCalc('7')}>7</button>
-      <button onClick={()=>updateCalc('8')}>8</button>
-      <button onClick={()=>updateCalc('9')}>9</button>
-      <button onClick={()=>updateCalc('-')}>-</button>
-      <button onClick={()=>updateCalc('.')}>.</button>
-      <button onClick={()=>updateCalc('0')}>0</button>
-    
-      <button onClick={calculate} className="span-two">=</button>
-    </div>
-);
+    );
+  }
 }
 
 export default App;
